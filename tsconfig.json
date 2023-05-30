@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "rootDir": "./src",
+    "baseUrl": "./src",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "commonjs",
+    "importHelpers": true,
+    "target": "es2020",
+    "removeComments": false,
+    "esModuleInterop": true,
+    "incremental": true,
+    "moduleResolution": "node",
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
+    "noImplicitThis": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "alwaysStrict": true,
+    "strictBindCallApply": true,
+    "resolveJsonModule": true,
+    "lib": [
+      "es2020",
+      "dom"
+    ],
+  },
+  "files": [
+    "plm-connector-example.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "tmp",
+  ]
+}
+
