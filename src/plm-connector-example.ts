@@ -1,7 +1,7 @@
 import {Readable} from 'stream';
 import {
-    ContextDto,
     PlmConnectorServiceInterface,
+    PlmContextDto,
     PlmObjectDefinition,
     PlmObjectMetaData,
     PlmQuery
@@ -15,7 +15,7 @@ export default class PlmConnectorExample implements PlmConnectorServiceInterface
     /**
      * @See PlmConnectorServiceInterface:discard
      */
-    public discard(context: ContextDto, id: string, revision: string): Promise<void> {
+    public discard(context: PlmContextDto, id: string, revision: string): Promise<void> {
         console.log(`discard ${id}, revision ${revision}`);
         return Promise.resolve(undefined);
     }
@@ -23,7 +23,7 @@ export default class PlmConnectorExample implements PlmConnectorServiceInterface
     /**
      * @See PlmConnectorServiceInterface:list
      */
-    public async list(context: ContextDto, query: PlmQuery): Promise<Array<PlmObjectDefinition>> {
+    public async list(context: PlmContextDto, query: PlmQuery): Promise<Array<PlmObjectDefinition>> {
         console.log(`list, query ${JSON.stringify(query)}`);
         return undefined;
     }
@@ -31,14 +31,14 @@ export default class PlmConnectorExample implements PlmConnectorServiceInterface
     /**
      * @See PlmConnectorServiceInterface:open
      */
-    public async open(context: ContextDto, id: string, revision: string): Promise<void> {
+    public async open(context: PlmContextDto, id: string, revision: string, name: string, is_new?: boolean): Promise<void> {
         console.log(`open ${id}, revision ${revision}`);
     }
 
     /**
      * @See PlmConnectorServiceInterface:readWithMeta
      */
-    public readWithMeta(context: ContextDto, id: string, revision: string): Promise<[Readable, PlmObjectMetaData]> {
+    public readWithMeta(context: PlmContextDto, id: string, revision: string): Promise<[Readable, PlmObjectMetaData]> {
         console.log(`readWithMeta ${id}, revision ${revision}`);
         return Promise.resolve([undefined, undefined]);
     }
@@ -46,14 +46,14 @@ export default class PlmConnectorExample implements PlmConnectorServiceInterface
     /**
      * @See PlmConnectorServiceInterface:save
      */
-    public async save(context: ContextDto, id: string, revision: string): Promise<void> {
+    public async save(context: PlmContextDto, id: string, revision: string): Promise<void> {
         console.log(`save ${id}, revision ${revision}`);
     }
 
     /**
      * @See PlmConnectorServiceInterface:saveAndDone
      */
-    public async saveAndDone(context: ContextDto, id: string, revision: string): Promise<void> {
+    public async saveAndDone(context: PlmContextDto, id: string, revision: string): Promise<void> {
         console.log(`saveAndDone ${id}, revision ${revision}`);
     }
 }

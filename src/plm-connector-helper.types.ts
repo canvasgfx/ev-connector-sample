@@ -3,13 +3,22 @@ import {Readable} from 'stream';
 /**
  * DTO to get the request context
  */
-export class ContextDto {
+export class PlmContextDto {
 
     center_id?: number;
 
     ip_address?: string;
 
-    // store request token, to use it as a cache key
+    /**
+     * this is a JSON config data, that contains everything needed to connect to the PLM.
+     * It could be for example, the name of the PLM database, or the URL to connect to it.
+     * This can be configured on Envision side with any configuration JSON data.
+     */
+    plm_config: Record<string, unknown>;
+
+    /**
+     * This is the OAuth token used to connect to PLM system
+     */
     token?: string;
 
     type: ContextType;
@@ -100,7 +109,7 @@ export interface PlmConnectorServiceInterface {
      * @param id PLM document identifier
      * @param revision PLM document revision number
      */
-    discard(context: ContextDto, id: string, revision: string): Promise<void>;
+    discard(context: PlmContextDto, id: string, revision: string): Promise<void>;
 
     /**
      * This command will list all the assets in the PLM system, based on the query
@@ -108,7 +117,7 @@ export interface PlmConnectorServiceInterface {
      * @param context context of the call (user id, center id...)
      * @param query PLM query, @see: PlmQuery
      */
-    list(context: ContextDto, query: PlmQuery): Promise<Array<PlmObjectDefinition>>;
+    list(context: PlmContextDto, query: PlmQuery): Promise<Array<PlmObjectDefinition>>;
 
     /**
      * This command notifies PLM system that the document has opened in WebCreator
@@ -117,8 +126,11 @@ export interface PlmConnectorServiceInterface {
      * @param context context of the call (user id, center id...)
      * @param id PLM document identifier
      * @param revision PLM document revision number
+     * @param name PLM document name. This field is important when we first create the document in Envision
+     * @param is_new is it a new PLM document? If yes, we recommend to create an empty file on PLM system to avoid any problem in
+     * other workflows.
      */
-    open(context: ContextDto, id: string, revision: string): Promise<void>;
+    open(context: PlmContextDto, id: string, revision: string, name: string, is_new?: boolean): Promise<void>;
 
     /**
      * This command reads PLM asset (binary) with metadata (last update date...)
@@ -127,7 +139,7 @@ export interface PlmConnectorServiceInterface {
      * @param id PLM document identifier
      * @param revision PLM document revision number
      */
-    readWithMeta(context: ContextDto, id: string, revision: string): Promise<[Readable, PlmObjectMetaData]>;
+    readWithMeta(context: PlmContextDto, id: string, revision: string): Promise<[Readable, PlmObjectMetaData]>;
 
     /**
      * This command notifies PLM system that the PLM document is ready to be saved
@@ -137,7 +149,7 @@ export interface PlmConnectorServiceInterface {
      * @param id PLM document identifier
      * @param revision PLM document revision number
      */
-    save(context: ContextDto, id: string, revision: string): Promise<void>;
+    save(context: PlmContextDto, id: string, revision: string): Promise<void>;
 
     /**
      * This command notifies PLM system that the PLM document is ready to be saved and committed
@@ -147,7 +159,7 @@ export interface PlmConnectorServiceInterface {
      * @param id PLM document identifier
      * @param revision PLM document revision number
      */
-    saveAndDone(context: ContextDto, id: string, revision: string): Promise<void>;
+    saveAndDone(context: PlmContextDto, id: string, revision: string): Promise<void>;
 }
 
 export declare type QuerySort = {
