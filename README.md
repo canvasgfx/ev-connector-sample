@@ -1,12 +1,12 @@
-# PLM Connector Sample for Envision
+# Ev-Connector Sample for Envision
 
 ## About
 
-This package is an example of implementation of a PLM connector, for Envision product. 
+This package is an example of implementation of a "envision connector", for Envision product. 
 
 ## Prerequisites
 
-Before starting to build the PLM connector, these tools need to be installed:
+Before starting to build the "envision connector", these tools need to be installed:
 
 - Node JS LTS (https://nodejs.org/en/download)
 
