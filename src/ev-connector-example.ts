@@ -1,17 +1,17 @@
 import {Readable} from 'stream';
 import {
-    EvConnectorContextDto,
-    EvConnectorObjectDefinition,
-    EvConnectorObjectMetaData,
-    EvConnectorQuery,
-    EvConnectorServiceInterface
+	EvConnectorContextDto,
+	EvConnectorObjectDefinition,
+	EvConnectorObjectMetaData,
+	EvConnectorQuery,
+	EvConnectorServiceInterface
 } from './ev-connector-helper.types';
 
 /**
  * This is an example of implementation for the Connector Service for Envision
  * @See EvConnectorServiceInterface
  */
-export default class PlmConnectorExample implements EvConnectorServiceInterface {
+export default class EvConnectorExample implements EvConnectorServiceInterface {
 	/**
 	 * @See EvConnectorServiceInterface:discard
 	 */
