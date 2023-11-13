@@ -15,8 +15,8 @@ export default class EvConnectorExample implements EvConnectorServiceInterface {
 	/**
 	 * @See EvConnectorServiceInterface:discard
 	 */
-	public discard(context: EvConnectorContextDto, id: string, revision: string): Promise<void> {
-		console.log(`discard ${id}, revision ${revision}`);
+	public discard(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<void> {
+		console.log(`discard ${datasourceObj.id}, revision ${datasourceObj.revision}`);
 		return Promise.resolve(undefined);
 	}
 
@@ -38,22 +38,32 @@ export default class EvConnectorExample implements EvConnectorServiceInterface {
 	/**
 	 * @See EvConnectorServiceInterface:readWithMeta
 	 */
-	public readWithMeta(context: EvConnectorContextDto, id: string, revision: string): Promise<[Readable, EvConnectorObjectMetaData]> {
-		console.log(`readWithMeta ${id}, revision ${revision}`);
+	public readWithMeta(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<[Readable, EvConnectorObjectMetaData]> {
+		console.log(`readWithMeta ${datasourceObj.id}, revision ${datasourceObj.revision}`);
 		return Promise.resolve([undefined, undefined]);
+	}
+
+	/**
+	 * @See EvConnectorServiceInterface:requestRead
+	 */
+	public requestRead(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<boolean> {
+		console.log(`requestRead ${datasourceObj.id}, revision ${datasourceObj.revision}`);
+		return Promise.resolve(false); // Note: returns true if workflow is async
 	}
 
 	/**
 	 * @See EvConnectorServiceInterface:save
 	 */
-	public async save(context: EvConnectorContextDto, id: string, revision: string): Promise<void> {
-		console.log(`save ${id}, revision ${revision}`);
+	public async save(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<boolean> {
+		console.log(`save ${datasourceObj.id}, revision ${datasourceObj.revision}`);
+		return Promise.resolve(false); // Note: returns true if workflow is async
 	}
 
 	/**
 	 * @See EvConnectorServiceInterface:saveAndDone
 	 */
-	public async saveAndDone(context: EvConnectorContextDto, id: string, revision: string): Promise<void> {
-		console.log(`saveAndDone ${id}, revision ${revision}`);
+	public async saveAndDone(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<boolean> {
+		console.log(`saveAndDone ${datasourceObj.id}, revision ${datasourceObj.revision}`);
+		return Promise.resolve(false); // Note: returns true if workflow is async
 	}
 }

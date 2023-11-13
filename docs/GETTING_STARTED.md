@@ -52,15 +52,13 @@ This command discards the local changes in Envision WebCreator, and notifies dat
 
 *Function signature*
 
-`discard(context: EvConnectorContextDto, id: string, revision: string): Promise<void>;`
+`discard(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<void>;`
 
 *Parameters*
 
- `context` context of the call (user id, center id...)`
+`context` context of the call (user id, center id...)`
 
-`id` datasource document identifier
-
-`revision` datasource document revision number
+`datasourceObj` datasource document
 
 #### list function
 
@@ -120,16 +118,30 @@ NOTE: this method is used when Envision Creator needs to load the evdoc (if user
 
 *Function signature*
 
-`readWithMeta(context: EvConnectorContextDto, id: string, revision: string): Promise<[Readable, EvConnectorObjectMetaData]>;`
+`readWithMeta(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<[Readable, EvConnectorObjectMetaData]>;`
 
 
 *Parameters*
 
 `context` context of the call (user id, center id...)
 
-`id` connector document identifier
+`datasourceObj` the datasource object info to get the file content
 
-`revision` connector document revision number
+#### requestRead function
+
+This command notifies datasource that the PLM document/asset will be downloaded.
+When it's ready to be downloaded, PLM system needs to notify it with PlmObjectStatus.DOWNLOAD_READY
+
+*Function signature*
+
+`requestRead(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<boolean>;`
+
+*Parameters*
+
+`context` context of the call (user id, center id...)
+
+`datasourceObj` the datasource object info to get the file content
+
 
 #### save function
 
@@ -139,20 +151,22 @@ This command is triggered whenever the user hits "save" button in the User Inter
 It can notify datasource system that the document is ready to be saved
 (the document on WebCreator will be in PENDING_SAVE status until the operation is finished on datasource side)
 
-It can also directly send the data to the datasource (depending on the datasource APIs).
+It can also directly send the data to the datasource (depending on the datasource workflow, see section Synchronous calls below).
 
 *Function signature*
 
-`save(context: EvConnectorContextDto, id: string, revision: string): Promise<void>;`
+`save(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, content?: Readable, assets?: Array<EvConnectorAsset>): Promise<boolean>;`
 
 
 *Parameters*
 
 `context` context of the call (user id, center id...)
 
-`id` connector document identifier
+`content` the content to save in datasource (if async call, this field is not used. See doc).
 
-`revision` connector document revision number
+`assets` the list of assets attached to this document
+
+`datasourceObj` the datasource object info to get the file content
 
 #### save and Done function
 
@@ -163,16 +177,18 @@ This command is similar to `save` except that it can perform extra steps on data
 
 *Function signature*
 
-`saveAndDone(context: EvConnectorContextDto, id: string, revision: string): Promise<void>;`
+`saveAndDone(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, content?: Readable, assets?: Array<EvConnectorAsset>): Promise<boolean>;`
 
 
 *Parameters*
 
 `context` context of the call (user id, center id...)
 
-`id` connector document identifier
+`content` the content to save in datasource (if async call, this field is not used. See doc).
 
-`revision` connector document revision number
+`assets` the list of assets attached to this document
+
+`datasourceObj` the datasource object info to get the file content
 
 ## Authentication with Datasource
 
@@ -183,18 +199,75 @@ Some extra parameters can be configured in the user interface, as shown below:
 
 If there is any need for specific URL, info, or secret, it could be specify here.
 
+Please note that this information is not encrypted, so every Envision Workspace administrator can see the values.
+
 Then, in the connector code, you can access such information using `EvConnectorContextDto.connector_config`. (It will contain all the information of this field).
 
-## Read/write calls
+## Read/write workflows
 
-Connector can support 2 different ways to get/save the data in the datasource. Asynchronous or synchronous.
+Connector can support 2 different ways to get/save the data in the datasource. Asynchronous or synchronous workflow.
 
-### Asynchronous calls
+### Synchronous workflow
+
+When the datasource is capable of dealing with Read/write sync calls, here are the steps to implement this workflow:
+
+*Sync Read calls*
+1. Envision Creator will notify datasource that it's starting to read data (via Connector), if needed. When `requestRead` is implemented, just returns `false` at the end of the function.
+2. Envision Creator will download content from datasource right after step 1 (without waiting). It will call `readWithMeta` to get data content from datasource.
+
+*Sync Write calls*
+1. Envision Creator will upload content that it wants to save into datasource (via Connector). When `save` or `saveAndDone` is implemented, just send data content with the correct endpoint to upload into datasource.
+
+
+
+### Asynchronous workflow
 
 Sometimes the datasource is used asynchronously for saving/loading data. It could be the case if datasource needs extra work to prepare data to be downloaded or saved.
 
 *Async Read calls*
 
 The steps are:
-1. Envision Creator will notify datasource that it wants to read data (via Connector). When readWithMeta is implemented, just call datasource with the correct endpoint to notify it.
-2. 
+1. Envision Creator will notify datasource that it wants to read data (via Connector). When `requestRead` is implemented, just call datasource with the correct endpoint to notify it. Method must return `true`.
+2. When data is ready to be downloaded, datasource must notify Envision. It can do it with API endpoint here: [Update datasource Object status](https://github.com/canvasgfx/ev-connector-sample/blob/main/docs/GETTING_STARTED.md#update-datasource-object-status) with the status **DOWNLOAD_READY**
+3. Then, `readWithMeta` will be automatically called to download data from datasource
+
+*Async Write calls*
+
+The steps are:
+1. Envision Creator will notify datasource that it wants to save data (via Connector). When `save` or `saveAndDone` is implemented, just call datasource with the correct endpoint to notify it. Method must return `true`.
+2. Datasource then will call API endpoint here: [Read Object content](https://github.com/canvasgfx/ev-connector-sample/blob/main/docs/GETTING_STARTED.md#read-object-content)
+3. Then, when everything is correctly saved on datasource side, it must notify Envision that the operation is complete, using [Update datasource Object status](https://github.com/canvasgfx/ev-connector-sample/blob/main/docs/GETTING_STARTED.md#update-datasource-object-status) with the status: **SAVE** or **SAVE_DONE**. 
+
+*Error handling in Async*
+
+If at any time, an error occured on datasource side, it can notify Envision by calling [Update datasource Object status](https://github.com/canvasgfx/ev-connector-sample/blob/main/docs/GETTING_STARTED.md#update-datasource-object-status) with the status: **ERROR**, and the `reason` (which will be displayed to the end user)
+
+## General error handling in Connector
+
+If an error occurred, connector implementation should throw:
+
+`new BadRequestException('message to display to end user');`
+
+or
+
+`new UnprocessableEntityException('token expired');` (in case a token needs to be renewed)
+
+You can also log into the server logs, using:
+
+- `context.logger.log('message')` 
+- `context.logger.warn('message')`
+- `context.logger.error('message')`
+
+## Envision API endpoints
+
+There is a few API endpoints that can be used by datasource to communicate with Envision.
+
+### Update datasource Object status
+
+This endpoint is used to notify that something happened on datasource side (async workflow).
+![](../img/update_status.png)
+
+### Read Object content
+
+This endpoint is used to download an evdoc that is stored in Envision Creator.
+![](../img/read_content.png)

@@ -31,7 +31,7 @@ npm install && npm build
 ## Documentation
 
 Please read the documentation for more details:
-https://github.com/canvasgfx/ev-connector-sample/docs/GETTING_STARTED.md
+https://github.com/canvasgfx/ev-connector-sample/blob/main/docs/GETTING_STARTED.md
 
 ## Note
 

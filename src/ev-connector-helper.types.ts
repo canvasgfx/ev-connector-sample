@@ -12,9 +12,16 @@ export class EvConnectorContextDto {
 	 * It could be for example, the name of the datasource database, or the URL to connect to it.
 	 * This can be configured on Envision side with any configuration JSON data.
 	 */
-	connector_config: Record<string, unknown>;
+	connector_config: ConnectorConfig;
+
+	connector_token?: string;
 
 	ip_address?: string;
+
+	/**
+	 * used to log error on server
+	 */
+	logger: LoggerService;
 
 	/**
 	 * This is the OAuth token used to connect to datasource system
@@ -28,19 +35,18 @@ export class EvConnectorContextDto {
 	workspace_id?: number;
 }
 
-export enum ContextType {
-	USER = 'user'
-}
+export type EvConnectorObjectIdentifier = string;
 
 export enum EvConnectorObjectType {
-	ASSET_3D,
+	ASSET_3D = 1,
 	IMAGE,
 	TABLE,
 	EVDOC,
+	MULTI_ASSET_3D
 }
 
 export interface EvConnectorQuery {
-	ids?: Array<string>;
+	ids?: Array<EvConnectorObjectIdentifier>;
 
 	/**
 	 * pagination number (starting at 1)
@@ -60,7 +66,12 @@ export interface EvConnectorSearchQuery {
 	/**
 	 * Connector asset id
 	 */
-	id?: string;
+	id?: EvConnectorObjectIdentifier;
+
+	/**
+	 * specific identifier on datasource side
+	 */
+	item_number?: string;
 
 	/**
 	 *  should we return only the latest revision?
@@ -79,21 +90,49 @@ export interface EvConnectorSearchQuery {
 }
 
 export interface EvConnectorObjectMetaData extends StorageMetaData {
+	item_number?: string;
+
 	revision: string;
 }
 
 export interface EvConnectorObjectDefinition {
-	id: string;
+	id: EvConnectorObjectIdentifier;
+
+	/**
+	 * is it an evdoc with Graphic?
+	 */
+	is_graphic?: boolean;
 
 	name: string;
+
+	/** this is an extra parameter that can be used to identify a file on datasource side. **/
+	plm_file_id?: string;
+
+	/** in case something was not correctly synchronized, reason explains why **/
+	reason?: string;
 
 	revision: string;
 
 	/** size in byte */
 	size?: number;
 
+	/** type of object in datasource **/
+	type?: EvConnectorObjectType;
+
 	/**  updated date in UTC */
 	updated?: Date;
+}
+
+export interface EvConnectorAsset {
+	id: EvConnectorObjectIdentifier;
+
+	item_type: EvConnectorItemType;
+}
+
+export enum EvConnectorItemType {
+	ASSET_3D = 'CAD',
+	IMAGE = 'tp_image',
+	TABLE = 'Part'
 }
 
 /**
@@ -106,10 +145,9 @@ export interface EvConnectorServiceInterface {
 	 * (this will typically release the datasource document lock, on datasource side)
 	 *
 	 * @param context context of the call (user id, center id...)
-	 * @param id datasource document identifier
-	 * @param revision datasource document revision number
+	 * @param datasourceObj the datasource object info to get the file content
 	 */
-	discard(context: EvConnectorContextDto, id: string, revision: string): Promise<void>;
+	discard(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<void>;
 
 	/**
 	 * This command will list all the assets in the datasource system, based on the query
@@ -136,31 +174,57 @@ export interface EvConnectorServiceInterface {
 	 * This command reads connector asset (binary) with metadata (last update date...)
 	 *
 	 * @param context context of the call (user id, center id...)
-	 * @param id connector document identifier
-	 * @param revision connector document revision number
+	 * @param datasourceObj the datasource object info to get the file content
 	 */
-	readWithMeta(context: EvConnectorContextDto, id: string, revision: string): Promise<[Readable, EvConnectorObjectMetaData]>;
+	readWithMeta(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<[Readable, EvConnectorObjectMetaData]>;
+
+	/**
+	 * This command notifies datasource system that the document/asset will be downloaded from datasource.
+	 * When it's ready to be downloaded, datasource system needs to notify it with PlmObjectStatus.DOWNLOAD_READY
+	 *
+	 * @param context context of the call (user id, center id...)
+	 * @param datasourceObj the datasource object info to get the file content
+	 *
+	 * @return true if it needs async read (which requires to poll the status of the object), false otherwise
+	 */
+	requestRead(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<boolean>;
 
 	/**
 	 * This command notifies datasource system that the connector document is ready to be saved
 	 * (the document on WebCreator will be in PENDING_SAVE status until the operation is finished on datasource side)
 	 *
 	 * @param context context of the call (user id, center id...)
-	 * @param id connector document identifier
-	 * @param revision connector document revision number
+	 * @param datasourceObj the datasource object info to get the file content
+	 * @param content the content to save in datasource (if async call, this field is not used. See doc).
+	 * @param assets the list of assets attached to this document
+	 *
+	 * @return true if it needs async write (which requires to poll the status of the object), false otherwise
 	 */
-	save(context: EvConnectorContextDto, id: string, revision: string): Promise<void>;
+	save(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, content?: Readable, assets?: Array<EvConnectorAsset>): Promise<boolean>;
 
 	/**
 	 * This command notifies Connector system that the Connector document is ready to be saved and committed
 	 * (the document on WebCreator will be in PENDING_SAVE status until the operation is finished on Connector side)
 	 *
 	 * @param context context of the call (user id, center id...)
-	 * @param id Connector document identifier
-	 * @param revision Connector document revision number
+	 * @param datasourceObj the datasource object info to get the file content
+	 * @param content the content to save in datasource (if async call, this field is not used. See doc).
+	 * @param assets the list of assets attached to this document
+	 *
+	 * @return true if it needs async write (which requires to poll the status of the object), false otherwise
 	 */
-	saveAndDone(context: EvConnectorContextDto, id: string, revision: string): Promise<void>;
+	saveAndDone(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, content?: Readable, assets?: Array<EvConnectorAsset>): Promise<boolean>;
 }
+
+/***********************************************************************************
+  Common interfaces
+ **********************************************************************************/
+
+export enum ContextType {
+	USER = 'user'
+}
+
+export type ConnectorConfig = Record<string, unknown>; // Note: this is configured in the admin section of Envision
 
 export declare type QuerySort = {
 	field: string;
@@ -194,4 +258,87 @@ export interface StorageMetaData {
 
 export interface UserEntity {
 	id: number;
+}
+
+/***********************************************************************************
+  Exceptions
+ **********************************************************************************/
+
+const UNPROCESSABLE = 422;
+const BAD_REQUEST = 400;
+
+export class BadRequestException extends Error {
+	/**
+	 * Instantiate an `BadRequestException` Exception.
+	 *
+	 * @example
+	 * `throw new BadRequestException()`
+	 *
+	 * @usageNotes
+	 * The HTTP response status code will be 400.
+	 * This error is used to tell Envision to display an explicit error message in the UI
+	 */
+	constructor(message: string) {
+		super();
+		this.message = message;
+	}
+
+	public get status(): number {
+		return BAD_REQUEST;
+	}
+}
+
+export class UnprocessableEntityException extends Error {
+	/**
+	 * Instantiate an `UnprocessableEntityException` Exception.
+	 *
+	 * @example
+	 * `throw new UnprocessableEntityException()`
+	 *
+	 * @usageNotes
+	 * The HTTP response status code will be 422.
+	 * This error is used to tell Envision to refresh the token
+	 */
+	constructor() {
+		super();
+	}
+
+	public get status(): number {
+		return UNPROCESSABLE;
+	}
+}
+
+export type LogLevel = 'log' | 'error' | 'warn' | 'debug' | 'verbose' | 'fatal';
+
+export interface LoggerService {
+	/**
+	 * Write a 'debug' level log.
+	 */
+	debug?(message: any, ...optionalParams: any[]): any;
+
+	/**
+	 * Write an 'error' level log.
+	 */
+	error(message: any, ...optionalParams: any[]): any;
+
+	/**
+	 * Write a 'log' level log.
+	 */
+	log(message: any, ...optionalParams: any[]): any;
+
+	/**
+	 * Set log levels.
+	 * @param levels log levels
+	 */
+	setLogLevels?(levels: LogLevel[]): any;
+
+	/**
+	 * Write a 'verbose' level log.
+	 */
+	verbose?(message: any, ...optionalParams: any[]): any;
+
+	/**
+	 * Write a 'warn' level log.
+	 */
+	warn(message: any, ...optionalParams: any[]): any;
 }
