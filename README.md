@@ -10,7 +10,7 @@ Before starting to build the "envision connector", these tools need to be instal
 
 - Node JS LTS (https://nodejs.org/en/download)
 
-## Instructions
+## QuickStart Instructions
 
 To create your own connector for a specific datasource system, please follow these steps:
 
@@ -28,6 +28,10 @@ npm install && npm build
 5 - Sign in to Envision as a Workspace admin, Go to admin section, and configure Connector Center according to the screenshot below:
 ![](./img/plm_connector_config.png)
 
+## Documentation
+
+Please read the documentation for more details:
+https://github.com/canvasgfx/ev-connector-sample/docs/GETTING_STARTED.md
 
 ## Note
 
