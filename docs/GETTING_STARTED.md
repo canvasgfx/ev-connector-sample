@@ -37,7 +37,7 @@ This is the product used to create/edit/view Envision documents
 
 ### Connector example
 
-You'll find the connector example here: [[https://github.com/canvasgfx/ev-connector-sample/src/ev-connector-example.ts](https://github.com/canvasgfx/ev-connector-sample/blob/main/src/ev-connector-example.ts)](https://github.com/canvasgfx/ev-connector-sample/blob/main/src/ev-connector-example.ts)
+You'll find the connector example here: [https://github.com/canvasgfx/ev-connector-sample/src/ev-connector-example.ts](https://github.com/canvasgfx/ev-connector-sample/blob/main/src/ev-connector-example.ts)
 This is a good starting point, as it provides the minimum basic functions to be implemented.
 
 In order for the connector to communicate with third-party application, it needs a few functions to be implemented. These functions are described below.
