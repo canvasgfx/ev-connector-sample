@@ -1,4 +1,4 @@
-# Ev-Connector Sample for Envision
+# Ev-Connect SDK Sample for Envision
 
 ## About
 
