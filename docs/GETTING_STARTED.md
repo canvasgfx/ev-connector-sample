@@ -6,21 +6,21 @@
 1. [About](#About)
 2. [Glossary](#Glossary)
 3. [Architecture](#Architecture)
-4. [Connector installation](#connector installation)
-4. [Connector configuration](#connector configuration)
-5. [Writing a Connector step by step](#Writing a Connector step by step)
- * [connector context](#connector context)
- * [discard function](#discard function)
- * [list function](#list function)
- * [open function](#open function)
- * [readWithMeta function](#readWithMeta function)
- * [requestRead function](#requestRead function)
- * [save function](#save function)
- * [save and Done function](#save and Done function)
-6. [Authentication with Datasource](#Authentication with Datasource)
-7. [Read/write workflows](#Read/write workflows)
-8. [General error handling in Connector](#General error handling in Connector)
-9. [Envision API endpoints](#Envision API endpoints)
+4. [Connector installation](#connector-installation)
+4. [Connector configuration](#connector-configuration)
+5. [Writing a Connector step by step](#writing-a-connector-step-by-step)
+ * [connector context](#connector-context)
+ * [discard function](#discard-function)
+ * [list function](#list-function)
+ * [open function](#open-function)
+ * [readWithMeta function](#readwithmeta-function)
+ * [requestRead function](#requestread-function)
+ * [save function](#save-function)
+ * [save and Done function](#save-and-done-function)
+6. [Authentication with Datasource](#authentication-with-datasource)
+7. [Read/write workflows](#readwrite-workflows)
+8. [General error handling in Connector](#general-error-handling-in-connector)
+9. [Envision API endpoints](#envision-api-endpoints)
 
 ## About 
 
@@ -63,7 +63,7 @@ The architecture is composed of 2 main elements: Envision application, and the D
 
 The 2 elements communicate with each other thanks to the Connector SDK, that is installed on Envision server and written in Typescript/Javascript.
 
-The connector uses a [configuration](#connector configuration) that is set by a workspace administrator in Envision UI. This configuration specifies Datasource URL, and other parameters.
+The connector uses a [configuration](#connector-configuration) that is set by a workspace administrator in Envision UI. This configuration specifies Datasource URL, and other parameters.
 
 Each time an action that is triggered by the user in the UI that requires interaction with Datasource, the Connector SDK is called.
 
@@ -73,7 +73,7 @@ To install a connector on Envision server, follow these steps:
 
 1 - clone this project
 
-2 - implement the [different functions](#Writing a Connector step by step) available in ev-connector-example.ts (this file can be renamed, as well as the class name)
+2 - implement the [different functions](#writing-a-connector-step-by-step) available in ev-connector-example.ts (this file can be renamed, as well as the class name)
 
 3 - Build the file, by running
 ```
@@ -94,7 +94,7 @@ In order for the connector to work properly, it needs a few settings in Envision
 2a. If we want the datasource to store/load evdocs, we need to create a Connector Center in Workspace Admin section as shown below:
    ![](../img/connector_center.png)
 Some extra parameters are available:
-* **Connector Name**: The connector name installed on Envision server (it is the javascript file name, see [connector installation](#Connector installation))
+* **Connector Name**: The connector name installed on Envision server (it is the javascript file name, see [connector installation](#connector-installation))
 * **Datasource Document retention period**: if you want to keep a cache of the evdoc on Envision side (to speed up the load process), you can specify a retention period here. If you don't want to keep a copy of the evdoc in Envision server, select "Delete immediately after save".
 * **Web Creator File Menu**: To show the File/Recent/Open file menu in Envision WebCreator
 * **Web Creator Insert Local Drive**: To allow the user to select assets from the local drive or not
