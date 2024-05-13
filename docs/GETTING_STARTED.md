@@ -7,8 +7,8 @@
 2. [Glossary](#Glossary)
 3. [Architecture](#Architecture)
 4. [Connector installation](#connector-installation)
-4. [Connector configuration](#connector-configuration)
-5. [Writing a Connector step by step](#writing-a-connector-step-by-step)
+5. [Connector configuration](#connector-configuration)
+6. [Writing a Connector step by step](#writing-a-connector-step-by-step)
  * [connector context](#connector-context)
  * [discard function](#discard-function)
  * [list function](#list-function)
@@ -17,10 +17,10 @@
  * [requestRead function](#requestread-function)
  * [save function](#save-function)
  * [save and Done function](#save-and-done-function)
-6. [Authentication with Datasource](#authentication-with-datasource)
-7. [Read/write workflows](#readwrite-workflows)
-8. [General error handling in Connector](#general-error-handling-in-connector)
-9. [Envision API endpoints](#envision-api-endpoints)
+7. [Authentication with Datasource](#authentication-with-datasource)
+8. [Read/write workflows](#readwrite-workflows)
+9. [General error handling in Connector](#general-error-handling-in-connector)
+10. [Envision API endpoints](#envision-api-endpoints)
 
 ## About 
 
