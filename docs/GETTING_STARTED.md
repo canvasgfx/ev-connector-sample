@@ -44,7 +44,7 @@ Then, you'll need to configure Envision to use the Connector (see configuration 
 This is the format of Envision document that is used to save/load document in Envision Creator.
 The extension name is `.evdoc`
 
-### Envision Connector
+### Envision Connector SDK
 This is the element (written in Typescript/Javascript) that is used by Envision Creator to communicate with datasource system.
 It is installed on Envision server and uses specific configuration to connect to the datasource.
 
@@ -52,14 +52,14 @@ It is installed on Envision server and uses specific configuration to connect to
 This is the application that will be connected to Envision Creator, and that stores all the assets/documents. It's the "single source of truth"
 
 ### Envision Creator
-This is the product used to create/edit/view Envision documents
+Also called Envision App. This is the product used to create/edit/view Envision documents
 
 ## Architecture
 
 ### Diagram
 ![](../img/connector_architecture.png)
 
-The architecture is composed of 2 main elements: Envision application, and the Datasource software (PLM...).
+The architecture is composed of 2 main elements: Envision Creator application, and the Datasource software (PLM...).
 
 The 2 elements communicate with each other thanks to the Connector SDK, that is installed on Envision server and written in Typescript/Javascript.
 
@@ -93,15 +93,16 @@ In order for the connector to work properly, it needs a few settings in Envision
 
 2a. If we want the datasource to store/load evdocs, we need to create a Connector Center in Workspace Admin section as shown below:
    ![](../img/connector_center.png)
+
 Some extra parameters are available:
 * **Connector Name**: The connector name installed on Envision server (it is the javascript file name, see [connector installation](#connector-installation))
 * **Datasource Document retention period**: if you want to keep a cache of the evdoc on Envision side (to speed up the load process), you can specify a retention period here. If you don't want to keep a copy of the evdoc in Envision server, select "Delete immediately after save".
 * **Web Creator File Menu**: To show the File/Recent/Open file menu in Envision WebCreator
 * **Web Creator Insert Local Drive**: To allow the user to select assets from the local drive or not
 
-NOTE: if you use the Embedded WebViewer in the datasource, please make sure `PLM embedded Viewer Grp` is selected in the Teams list
+> NOTE : if you use the Embedded WebViewer in the datasource, please make sure `PLM embedded Viewer Grp` is selected in the Teams list
 
-2b. If we only want the datasource for assets (images/3D...), we can use a regular Center and enable the functionality as shown below:
+2b. If we only want the datasource for assets import (images/3D...), `and the evdoc is only stored in Envision Server` we can use a regular Center and enable the functionality as shown below:
 ![](../img/hybrid_center.png)
 
 3. We need to provide the connector configuration. This configuration will be passed to Connector SDK when it will run.
@@ -287,12 +288,20 @@ Then, in the connector code, you can access such information using `EvConnectorC
 
 ### OAuth2 authentication
 
+#### Authorization Code flow
 For a more robust and secure way to authenticate on Datasource side, Envision uses OAuth2 workflow. 
+
+> In order for this mode to be activated, [the Connector SDK configuration](#connector-configuration) needs to have `grant_type` sets to `authorization_code` and `server_url` sets to the URL of the Identity Provider (where .well-known/openid-configuration is).
 
 Each time an action is initiated by the user that needs the connector SDK, Envision makes sure that a Datasource OAuth2 Access token is available and up to date on client side.
 If not, it automatically starts an OAuth2 authentication workflow, redirecting the user to the Datasource Identity Provider, as shown in the diagram below:
 ![](../img/authentication_workflow.png)
 
+#### Password flow
+This solution is less secure than Authorization Code. However, if Authorization code is not possible, Connector SDK can use a password Oauth2 flow.
+> In order for this mode to be activated, [the Connector SDK configuration](#connector-configuration) needs to have `grant_type` sets to `password` and `server_url` sets to the URL of the Identity Provider (where .well-known/openid-configuration is).
+
+In this mode a popup will show up, asking the user to enter their credentials (username and password). When the form is submitted, it will send the data to the Identity Provider, to get Oauth2 tokens.
 ## Read/write workflows
 
 Connector can support 2 different ways to get/save the data in the datasource. Asynchronous or synchronous workflow.
