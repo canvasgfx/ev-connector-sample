@@ -1,20 +1,42 @@
 # Getting started with Envision Connector
 
+## Table of contents
+
+
+1. [About](#About)
+2. [Glossary](#Glossary)
+3. [Architecture](#Architecture)
+4. [Connector installation](#connector installation)
+4. [Connector configuration](#connector configuration)
+5. [Writing a Connector step by step](#Writing a Connector step by step)
+ * [connector context](#connector context)
+ * [discard function](#discard function)
+ * [list function](#list function)
+ * [open function](#open function)
+ * [readWithMeta function](#readWithMeta function)
+ * [requestRead function](#requestRead function)
+ * [save function](#save function)
+ * [save and Done function](#save and Done function)
+6. [Authentication with Datasource](#Authentication with Datasource)
+7. [Read/write workflows](#Read/write workflows)
+8. [General error handling in Connector](#General error handling in Connector)
+9. [Envision API endpoints](#Envision API endpoints)
+
 ## About 
 
 This article describes how to write an Envision Connector, in Typescript.
-Envision Connector let you connect a datasource system (like a PLM) to Envision Product. 
+Envision Connector lets you connect a datasource system (like a PLM) to Envision Product. 
 
 
 For example:
-- You can integrate a PLM software to get all the assets (3D, images, CAD information) in Envision Creator,
-- You can load an Envision document (evdoc) from the PLM software.
-- You can save an Envision document back to the PLM software.
+- You can integrate a PLM software to import all the assets (3D, images, CAD information) in Envision Creator,
+- You can load an Envision document (evdoc) that is stored in the PLM software.
+- You can save an Envision document back to the PLM software/Datasource.
 
 In order to create these functionalities, you'll need to create a Connector between the datasource system and Envision.
 
 This connector needs to be written in Typescript (or Javascript), and installed on Envision server.
-Then, you'll need to configure Envision to use the Connector.
+Then, you'll need to configure Envision to use the Connector (see configuration below).
 
 ## Glossary
 
@@ -32,6 +54,60 @@ This is the application that will be connected to Envision Creator, and that sto
 ### Envision Creator
 This is the product used to create/edit/view Envision documents
 
+## Architecture
+
+### Diagram
+![](../img/connector_architecture.png)
+
+The architecture is composed of 2 main elements: Envision application, and the Datasource software (PLM...).
+
+The 2 elements communicate with each other thanks to the Connector SDK, that is installed on Envision server and written in Typescript/Javascript.
+
+The connector uses a [configuration](#connector configuration) that is set by a workspace administrator in Envision UI. This configuration specifies Datasource URL, and other parameters.
+
+Each time an action that is triggered by the user in the UI that requires interaction with Datasource, the Connector SDK is called.
+
+## Connector installation
+
+To install a connector on Envision server, follow these steps:
+
+1 - clone this project
+
+2 - implement the [different functions](#Writing a Connector step by step) available in ev-connector-example.ts (this file can be renamed, as well as the class name)
+
+3 - Build the file, by running
+```
+npm install && npm build
+```
+
+4 - Copy the built file from `dist/ev-connector-example.js` to the installation path of Envision `<Envision installation path>/dist/workspaces/server/`
+
+
+## Connector configuration
+
+In order for the connector to work properly, it needs a few settings in Envision Application.
+
+1. The workspace needs to be configured to enable connector SDK (in the Envision Internal section)
+
+![](../img/enable_workspace_connector.png)
+
+2a. If we want the datasource to store/load evdocs, we need to create a Connector Center in Workspace Admin section as shown below:
+   ![](../img/connector_center.png)
+Some extra parameters are available:
+* **Connector Name**: The connector name installed on Envision server (it is the javascript file name, see [connector installation](#Connector installation))
+* **Datasource Document retention period**: if you want to keep a cache of the evdoc on Envision side (to speed up the load process), you can specify a retention period here. If you don't want to keep a copy of the evdoc in Envision server, select "Delete immediately after save".
+* **Web Creator File Menu**: To show the File/Recent/Open file menu in Envision WebCreator
+* **Web Creator Insert Local Drive**: To allow the user to select assets from the local drive or not
+
+NOTE: if you use the Embedded WebViewer in the datasource, please make sure `PLM embedded Viewer Grp` is selected in the Teams list
+
+2b. If we only want the datasource for assets (images/3D...), we can use a regular Center and enable the functionality as shown below:
+![](../img/hybrid_center.png)
+
+3. We need to provide the connector configuration. This configuration will be passed to Connector SDK when it will run.
+This configuration is a JSON object, that typically includes the URL to datasource and some extra configuration. Here is an example:
+
+> {"datasource_url":"1.2.3.4/mydatasource","database":"InnovatorSolutions","grant_type":"authorization_code","client_id":"InnovatorClient","scope":"openid offline_access Innovator"}
 
 ## Writing a Connector step by step
 
@@ -41,6 +117,11 @@ You'll find the connector example here: [https://github.com/canvasgfx/ev-connect
 This is a good starting point, as it provides the minimum basic functions to be implemented.
 
 In order for the connector to communicate with third-party application, it needs a few functions to be implemented. These functions are described below.
+
+#### Connector context
+
+For each function described below, a context object is passed as parameter. This object contains all the information needed to connect to datasource.
+You can see a description of the context object here: [ev-connector-helper.types.ts](../src/ev-connector-helper.types.ts)
 
 #### discard function
 
@@ -192,6 +273,7 @@ This command is similar to `save` except that it can perform extra steps on data
 
 ## Authentication with Datasource
 
+### Introduction (basic authentication)
 In order for Envision Connector to communicate with datasource system, it needs a mechanism to authenticate to it.
 
 Some extra parameters can be configured in the user interface, as shown below:
@@ -202,6 +284,14 @@ If there is any need for specific URL, info, or secret, it could be specify here
 Please note that this information is not encrypted, so every Envision Workspace administrator can see the values.
 
 Then, in the connector code, you can access such information using `EvConnectorContextDto.connector_config`. (It will contain all the information of this field).
+
+### OAuth2 authentication
+
+For a more robust and secure way to authenticate on Datasource side, Envision uses OAuth2 workflow. 
+
+Each time an action is initiated by the user that needs the connector SDK, Envision makes sure that a Datasource OAuth2 Access token is available and up to date on client side.
+If not, it automatically starts an OAuth2 authentication workflow, redirecting the user to the Datasource Identity Provider, as shown in the diagram below:
+![](../img/authentication_workflow.png)
 
 ## Read/write workflows
 
@@ -250,7 +340,7 @@ If an error occurred, connector implementation should throw:
 
 or
 
-`new UnprocessableEntityException('token expired');` (in case a token needs to be renewed)
+`new UnprocessableEntityException('token expired');` (in case a datasource Access Token needs to be renewed on client side)
 
 You can also log into the server logs, using:
 

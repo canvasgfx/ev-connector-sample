@@ -1,51 +1,94 @@
 import {Readable} from 'stream';
 
+export interface EvAccessTokenInfo {
+	/**
+	 * This is the Envision OAuth2 Access token used by Envision application to authenticate the current user on Envision app.
+	 * This token is useful if the datasource needs to call Envision API. The Access Token is always valid as
+	 * Envision App renews expired token automatically, before using EV-Connector
+	 */
+	token: string;
+}
+
 /**
  * DTO to get the request context
  */
 export class EvConnectorContextDto {
 
+	/**
+	 * This is the current center id of the opened document. Useful for Envision API calls.
+	 */
 	center_id?: number;
 
 	/**
 	 * this is a JSON config data, that contains everything needed to connect to the datasource.
 	 * It could be for example, the name of the datasource database, or the URL to connect to it.
-	 * This can be configured on Envision side with any configuration JSON data.
+	 * This can be configured on Envision side in the UI (by a workspace administrator) with any configuration JSON data.
 	 */
 	connector_config: ConnectorConfig;
 
+	/**
+	 * This is the Datasource OAuth2 access token used to authenticate requests to Datasource.
+	 * The access token is acquired using an OAuth2 workflow, before any Connector operation is initiated.
+	 * The Oauth2 workflow starts on Envision side when user clicks on a button that is related with the Connector.
+	 * If users is already authenticated to the datasource, Envision uses the existing known Datasource token.
+	 */
 	connector_token?: string;
 
+	/**
+	 * This is the IPv4 address of the user
+	 */
 	ip_address?: string;
 
 	/**
-	 * used to log error on server
+	 * used to log error on Envision server
 	 */
 	logger: LoggerService;
 
 	/**
-	 * This is the OAuth token used to connect to datasource system
+	 * This is the Envision OAuth token used by Envision to authenticate the user
 	 */
-	token?: string;
+	token_info?: EvAccessTokenInfo;
 
+	/**
+	 * There is only one context Type for Connector, which is USER
+	 */
 	type: ContextType;
 
+	/**
+	 * The current user that is authenticated on Envision side
+	 */
 	user?: Partial<UserEntity>;
 
+	/**
+	 * The current workspace id. Useful for Envision API calls.
+	 */
 	workspace_id?: number;
 }
 
+/**
+ * A unique identifier of the Datasource object (image, text, document...)
+ */
 export type EvConnectorObjectIdentifier = string;
 
+
+/**
+ * The current datasource object types that are supported on Envision side
+ */
 export enum EvConnectorObjectType {
 	ASSET_3D = 1,
 	IMAGE,
 	TABLE,
 	EVDOC,
+	/**
+	 * Multi 3D asset is a composed asset of multiple sub-files on Datasource side
+	 */
 	MULTI_ASSET_3D
 }
 
 export interface EvConnectorQuery {
+	/**
+	 * filter specific Datasource object ids. Optional
+	 */
 	ids?: Array<EvConnectorObjectIdentifier>;
 
 	/**
