@@ -1,4 +1,4 @@
-# Getting started with Envision Connector
+# Getting started with Envision Connector SDK
 
 ## Table of contents
 
@@ -44,15 +44,15 @@ Then, you'll need to configure Envision to use the Connector (see configuration 
 This is the format of Envision document that is used to save/load document in Envision Creator.
 The extension name is `.evdoc`
 
+### Envision Creator
+Also called Envision App. This is the product used to create/edit/view Envision documents
+
 ### Envision Connector SDK
-This is the element (written in Typescript/Javascript) that is used by Envision Creator to communicate with datasource system.
+Also called ev-connect SDK. This is the element (written in Typescript/Javascript) that is used by Envision Creator to communicate with datasource system.
 It is installed on Envision server and uses specific configuration to connect to the datasource.
 
 ### Datasource system
 This is the application that will be connected to Envision Creator, and that stores all the assets/documents. It's the "single source of truth"
-
-### Envision Creator
-Also called Envision App. This is the product used to create/edit/view Envision documents
 
 ## Architecture
 
