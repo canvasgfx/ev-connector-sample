@@ -311,7 +311,7 @@ Connector can support 2 different ways to get/save the data in the datasource. A
 When the datasource is capable of dealing with Read/write sync calls, here are the steps to implement this workflow:
 
 *Sync Read calls*
-1. Envision Creator will notify datasource that it's starting to read data (via Connector), if needed. When `requestRead` is implemented, just returns `false` at the end of the function.
+1. Envision Creator will notify datasource that it's starting to read data (via Connector), if needed. When `requestRead` is implemented, it must return `false` at the end of the function, to tell the application that the call is synchronous.
 2. Envision Creator will download content from datasource right after step 1 (without waiting). It will call `readWithMeta` to get data content from datasource.
 
 *Sync Write calls*
