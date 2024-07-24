@@ -110,8 +110,11 @@ This configuration is a JSON object, that typically includes the URL to datasour
 
 > {"datasource_url":"1.2.3.4/mydatasource","database":"InnovatorSolutions","grant_type":"authorization_code","client_id":"InnovatorClient","scope":"openid offline_access Innovator", "show_file_open":true,"search_params":[{"id":"name","label":"Name"},{"id":"id","label":"PLM ID"},{"id":"item_number","label":"PLM Number"},{"id":"workpace_id","label":"PLM Workspace ID"}]}
 
+
 3a. In the above example, show_file_open and search_params are optional configurations. 
+
    (i) "show_file_open": This boolean property is set to true if you need a command to open a file from Canvas' side navigation menu or ribbon menu.
+   
    (ii) "search_params": This is an array of objects where each object contains id, label, and placeholder properties. These objects can be used for advanced search queries.
 
 ## Writing a Connector step by step
