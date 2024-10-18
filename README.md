@@ -23,7 +23,7 @@ To create your own connector for a specific datasource system, please follow the
 npm install && npm build
 ```
 
-4 - Copy the built file from `dist/ev-connector-example.js` to the installation path of Envision `<Envision installation path>/dist/apps/server`
+4 - Copy the built file from `dist/ev-connector-example.js` to the installation path of Envision `<Envision installation path>/dist/workspaces/server/`
 
 5 - Sign in to Envision as a Workspace admin, Go to admin section, and configure Connector Center according to the screenshot below:
 ![](./img/plm_connector_config.png)
