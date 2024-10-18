@@ -30,7 +30,7 @@ Envision Connector lets you connect a datasource system (like a PLM) to Envision
 
 For example:
 - You can integrate a PLM software to import all the assets (3D, images, CAD information) in Envision Creator,
-- You can load an Envision document (evdoc) that is stored in the PLM software.
+- You can load an Envision document (evdoc) that is stored in the PLM software and also save it in Envision.
 - You can save an Envision document back to the PLM software/Datasource.
 
 In order to create these functionalities, you'll need to create a Connector between the datasource system and Envision.
@@ -80,7 +80,7 @@ To install a connector on Envision server, follow these steps:
 npm install && npm build
 ```
 
-4 - Copy the built file from `dist/ev-connector-example.js` to the installation path of Envision `<Envision installation path>/dist/workspaces/server/`
+4 - Copy the built file from `dist/ev-connector-example.js` to the installation path of Envision `<Envision installation path>/dist/apps/server/`
 
 
 ## Connector configuration
@@ -105,17 +105,28 @@ Some extra parameters are available:
 2b. If we only want the datasource for assets import (images/3D...), `and the evdoc is only stored in Envision Server` we can use a regular Center and enable the functionality as shown below:
 ![](../img/hybrid_center.png)
 
-3. We need to provide the connector configuration. This configuration will be passed to Connector SDK when it will run.
-This configuration is a JSON object, that typically includes the URL to datasource and some extra configuration. Here is an example:
-
-> {"datasource_url":"1.2.3.4/mydatasource","database":"InnovatorSolutions","grant_type":"authorization_code","client_id":"InnovatorClient","scope":"openid offline_access Innovator", "show_file_open":true,"search_params":[{"id":"name","label":"Name"},{"id":"id","label":"PLM ID"},{"id":"item_number","label":"PLM Number"},{"id":"workpace_id","label":"PLM Workspace ID"}]}
+2c. If we want the evdocs in the datasource and Envision to be synchronized, create a regular Center, and Enable activate EvConnect SDK and isPDM toggles as shown below:
+![](./img/pdm_connector_config.png)
 
 
-3a. In the above example, show_file_open and search_params are optional configurations. 
+3. To configure the connector, you need to provide a configuration object. This configuration will be passed to the Connector SDK when it runs. The configuration is a JSON object that typically includes details such as the URL to the data source and other relevant settings.
 
-   (i) "show_file_open": This boolean property is set to true if you need a command to open a file from Canvas' side navigation menu or ribbon menu.
+You can also define any additional properties in this JSON object that you might need later in your connector functions. This JSON object will be passed as a parameter to all connector functions. Here is an example:
+
+> {"datasource_url":"1.2.3.4/mydatasource","database":"InnovatorSolutions","grant_type":"authorization_code","client_id":"InnovatorClient","scope":"openid offline_access Innovator", "show_file_open":true,"search_params":[{"id":"name","label":"Name"},{"id":"id","label":"PLM ID"},{"id":"item_number","label":"PLM Number"},{"id":"workpace_id","label":"PLM Workspace ID"}], "pdm_auth_type": "password", "pdm_auth_name": "Vault", "query_limit": 50}
+
+
+3a. In the above example, the following are some of the optional configurations. 
+
+   (i) **"show_file_open":** This boolean property is set to true if you need a command to open a file from Canvas' side navigation menu or ribbon menu.
    
-   (ii) "search_params": This is an array of objects where each object contains id, label, and placeholder properties. These objects can be used for advanced search queries.
+   (ii) **"search_params":** This is an array of objects where each object contains id, label, and placeholder properties. These objects can be used for advanced search queries.
+
+   (iii) **"pdm_auth_type":** This property should be set to "password" if an additional authentication layer is required. When enabled, after the primary authentication, a dialog box will prompt the user to enter credentials for the second authentication layer. These credentials are passed to the connector via the context.connector_username and context.connector_password properties. The connector is responsible for handling this secondary authentication using the provided credential values.
+         **pdm_auth_name:** If you want to display a custom name (e.g., the name of the company or authentication layer) in the dialog box described in the previous point, you can assign that value to this property. The specified name will appear in the secondary authentication dialog for user clarity.
+
+   (iv) **query_limit:** This property sets the maximum number of records that can be returned by the connector's list function. You can assign any numerical value to define the limit of records retrieved in a single query.
+
 
 ## Writing a Connector step by step
 
@@ -287,7 +298,7 @@ In order for Envision Connector to communicate with datasource system, it needs 
 Some extra parameters can be configured in the user interface, as shown below:
 ![](../img/extra_config.png)
 
-If there is any need for specific URL, info, or secret, it could be specify here.
+If there is any need for specific URL, info, or secret, it could be specified here.
 
 Please note that this information is not encrypted, so every Envision Workspace administrator can see the values.
 
@@ -303,6 +314,8 @@ For a more robust and secure way to authenticate on Datasource side, Envision us
 Each time an action is initiated by the user that needs the connector SDK, Envision makes sure that a Datasource OAuth2 Access token is available and up to date on client side.
 If not, it automatically starts an OAuth2 authentication workflow, redirecting the user to the Datasource Identity Provider, as shown in the diagram below:
 ![](../img/authentication_workflow.png)
+
+**Note:** In the connector configuration, you can set the "is_redirect_uri_configured" property to true if the redirect URI is handled and configured by the authenticator itself.
 
 #### Password flow
 This solution is less secure than Authorization Code. However, if Authorization code is not possible, Connector SDK can use a password Oauth2 flow.
