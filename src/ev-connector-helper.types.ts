@@ -63,6 +63,16 @@ export class EvConnectorContextDto {
 	 * The current workspace id. Useful for Envision API calls.
 	 */
 	workspace_id?: number;
+
+	/**
+	 * The username entered by the user in the secondary authentication layer.
+	 */
+	connector_username?: string;
+
+	/**
+	 * The password entered by the user in the secondary authentication layer.
+	 */
+	connector_password?: string;
 }
 
 /**
@@ -102,6 +112,7 @@ export interface EvConnectorQuery {
 
 	type?: EvConnectorObjectType;
 
+	query_limit?: number;
 }
 
 export interface EvConnectorSearchQuery {
@@ -172,11 +183,24 @@ export interface EvConnectorAsset {
 	item_type: EvConnectorItemType;
 }
 
+export interface EvConnectorMetaDefinition {
+	id?: EvConnectorObjectIdentifier;
+
+	plm_file_id?: string;
+
+	revision?: string;
+}
+
 export enum EvConnectorItemType {
 	ASSET_3D = 'CAD',
 	IMAGE = 'tp_image',
 	TABLE = 'Part'
 }
+
+/**
+ *  A message that can be send back and forth between Envision and datasource
+ */
+export type EvMessage = Record<string, unknown>;
 
 /**
  * Connector Service interface used by Envision to communicate with datasource system
@@ -243,7 +267,7 @@ export interface EvConnectorServiceInterface {
 	 *
 	 * @return true if it needs async write (which requires to poll the status of the object), false otherwise
 	 */
-	save(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, content?: Readable, assets?: Array<EvConnectorAsset>): Promise<boolean>;
+	save(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, content?: Readable, assets?: Array<EvConnectorAsset>): Promise<boolean | EvConnectorMetaDefinition>;
 
 	/**
 	 * This command notifies Connector system that the Connector document is ready to be saved and committed
@@ -256,7 +280,19 @@ export interface EvConnectorServiceInterface {
 	 *
 	 * @return true if it needs async write (which requires to poll the status of the object), false otherwise
 	 */
-	saveAndDone(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, content?: Readable, assets?: Array<EvConnectorAsset>): Promise<boolean>;
+	saveAndDone(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, content?: Readable, assets?: Array<EvConnectorAsset>): Promise<boolean | EvConnectorMetaDefinition>;
+
+	
+	/**
+	 * This command sends a synchronous message to Envision or dataSource with a specific payload.
+	 *
+	 * @param context context of the call (user id, center id...)
+	 * @param datasourceObj the datasource object info to get the file content
+	 * @param message the content of the message to be sent
+	 *
+	 * @return void
+	 */
+	sendMessage<Payload extends EvMessage = EvMessage>(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, message: Payload): Promise<void>;
 }
 
 /***********************************************************************************
