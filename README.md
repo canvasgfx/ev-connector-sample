@@ -23,10 +23,13 @@ To create your own connector for a specific datasource system, please follow the
 npm install && npm build
 ```
 
-4 - Copy the built file from `dist/ev-connector-example.js` to the installation path of Envision `<Envision installation path>/dist/workspaces/server/`
+4 - Copy the built file from `dist/ev-connector-example.js` to the installation path of Envision `<Envision installation path>/dist/apps/server/`
 
-5 - Sign in to Envision as a Workspace admin, Go to admin section, and configure Connector Center according to the screenshot below:
+5 - Sign in to Envision as a Workspace admin, Navigate to the admin section, and configure Connector Center. There are now two types of centers that users can create:
+    a) - **PLM Center:** Documents are stored in the data source system, and Envision can cache the document temporarily.
 ![](./img/plm_connector_config.png)
+
+    b) - **PDM Center:** Documents are stored in Envision and synchronized between the data source system and Envision.
 
 ## Documentation
 
