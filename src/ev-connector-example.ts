@@ -1,10 +1,12 @@
 import {Readable} from 'stream';
 import {
 	EvConnectorContextDto,
+	EvConnectorMetaDefinition,
 	EvConnectorObjectDefinition,
 	EvConnectorObjectMetaData,
 	EvConnectorQuery,
-	EvConnectorServiceInterface
+	EvConnectorServiceInterface,
+	EvMessage
 } from './ev-connector-helper.types';
 
 /**
@@ -54,7 +56,7 @@ export default class EvConnectorExample implements EvConnectorServiceInterface {
 	/**
 	 * @See EvConnectorServiceInterface:save
 	 */
-	public async save(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<boolean> {
+	public async save(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<boolean | EvConnectorMetaDefinition> {
 		console.log(`save ${datasourceObj.id}, revision ${datasourceObj.revision}`);
 		return Promise.resolve(false); // Note: returns true if workflow is async
 	}
@@ -62,8 +64,15 @@ export default class EvConnectorExample implements EvConnectorServiceInterface {
 	/**
 	 * @See EvConnectorServiceInterface:saveAndDone
 	 */
-	public async saveAndDone(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<boolean> {
+	public async saveAndDone(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<boolean | EvConnectorMetaDefinition> {
 		console.log(`saveAndDone ${datasourceObj.id}, revision ${datasourceObj.revision}`);
 		return Promise.resolve(false); // Note: returns true if workflow is async
+	}
+
+	/**
+	 * @See EvConnectorServiceInterface:sendMessage
+	 */
+	public async sendMessage<Payload extends EvMessage = EvMessage>(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, message: Payload): Promise<void> {
+
 	}
 }
