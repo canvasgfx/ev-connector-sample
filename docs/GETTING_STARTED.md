@@ -105,8 +105,8 @@ Some extra parameters are available:
 2b. If we only want the datasource for assets import (images/3D...), `and the evdoc is only stored in Envision Server` we can use a regular Center and enable the functionality as shown below:
 ![](../img/hybrid_center.png)
 
-2c. If we want the evdocs in the datasource and Envision to be synchronized, create a regular Center, and Enable activate EvConnect SDK and isPDM toggles as shown below:
-![](./img/pdm_connector_config.png)
+2c. If we want the evdocs in the datasource and Envision to be synchronized, create a regular Center, and enable the **Activate ev-connect SDK** and **isPDM** toggles as shown below:
+![](../img/pdm_connector_config.png)
 
 
 3. To configure the connector, you need to provide a configuration object. This configuration will be passed to the Connector SDK when it runs. The configuration is a JSON object that typically includes details such as the URL to the data source and other relevant settings.
@@ -120,12 +120,20 @@ You can also define any additional properties in this JSON object that you might
 
    (i) **"show_file_open":** This boolean property is set to true if you need a command to open a file from Canvas' side navigation menu or ribbon menu.
    
-   (ii) **"search_params":** This is an array of objects where each object contains id, label, and placeholder properties. These objects can be used for advanced search queries.
+   (ii) **"search_params":** This property is an array of objects, where each object contains the following properties id, label?, type?, values? and placeholder? properties. These objects can be used to define advanced search queries. The default type is 'text'. If you require a dropdown in the search fields, set the **type** property to **'dropdown'**. When the type is 'dropdown', use the values property(an array of objects with id and label fields), to specify the options available in the dropdown search filter.
 
    (iii) **"pdm_auth_type":** This property should be set to "password" if an additional authentication layer is required. When enabled, after the primary authentication, a dialog box will prompt the user to enter credentials for the second authentication layer. These credentials are passed to the connector via the context.connector_username and context.connector_password properties. The connector is responsible for handling this secondary authentication using the provided credential values.
          **pdm_auth_name:** If you want to display a custom name (e.g., the name of the company or authentication layer) in the dialog box described in the previous point, you can assign that value to this property. The specified name will appear in the secondary authentication dialog for user clarity.
 
    (iv) **query_limit:** This property sets the maximum number of records that can be returned by the connector's list function. You can assign any numerical value to define the limit of records retrieved in a single query.
+
+   (v) **test_without_authentication:**: Set this property to true if you wish to test the connector without setting up authentication. **Note:** This setting is recommended for development and testing purposes only and should not be used in a production environment.
+
+   (vi) **single_file_assembly_ext:** Specify a list of extensions(csv) for single-assembly 3D models that you want to display in the browse dialog when inserting a 3D model. Use this property to restrict file selection to the specified extensions. The default value is 'ipt,sldprt,step,stp,igs,iges'
+
+   (vii) **single_file_assembly_ext:** Specify a list of extensions(csv) for multi-file assembly 3D models that you want to display in the browse dialog when inserting a 3D model. Use this property to restrict file selection to the specified extensions. The default value is 'iam,dwg,sldasm'.
+
+   (viii) **table_additional_columns:** This property is an array of objects, where each object contains id and label properties. Use this property to define additional columns in the table that are not part of your search filters.
 
 
 ## Writing a Connector step by step
