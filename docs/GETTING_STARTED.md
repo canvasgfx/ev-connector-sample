@@ -105,7 +105,7 @@ Some extra parameters are available:
 2b. If we only want the datasource for assets import (images/3D...), `and the evdoc is only stored in Envision Server` we can use a regular Center and enable the functionality as shown below:
 ![](../img/hybrid_center.png)
 
-2c. If we want the evdocs in the datasource and Envision to be synchronized, create a regular Center, and Enable activate EvConnect SDK and isPDM toggles as shown below:
+2c. If we want the evdocs in the datasource and Envision to be synchronized, create a regular Center, and enable the Activate **ev-connect SDK** and **isPDM** toggles as shown below:
 ![](../img/pdm_connector_config.png)
 
 
