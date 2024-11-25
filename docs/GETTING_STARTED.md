@@ -106,7 +106,7 @@ Some extra parameters are available:
 ![](../img/hybrid_center.png)
 
 2c. If we want the evdocs in the datasource and Envision to be synchronized, create a regular Center, and Enable activate EvConnect SDK and isPDM toggles as shown below:
-![](./img/pdm_connector_config.png)
+![](../img/pdm_connector_config.png)
 
 
 3. To configure the connector, you need to provide a configuration object. This configuration will be passed to the Connector SDK when it runs. The configuration is a JSON object that typically includes details such as the URL to the data source and other relevant settings.
