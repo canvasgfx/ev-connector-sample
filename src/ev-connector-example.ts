@@ -75,4 +75,11 @@ export default class EvConnectorExample implements EvConnectorServiceInterface {
 	public async sendMessage<Payload extends EvMessage = EvMessage>(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, message: Payload): Promise<void> {
 
 	}
+
+	/**
+	 * @See EvConnectorServiceInterface:publishEvDocument
+	 */
+	public async publishEvDocument(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<void> {
+
+	}
 }
