@@ -293,6 +293,16 @@ export interface EvConnectorServiceInterface {
 	 * @return void
 	 */
 	sendMessage<Payload extends EvMessage = EvMessage>(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, message: Payload): Promise<void>;
+
+	/**
+	 * This command notifies the connector to publish the document in the datasource system.
+	 *
+	 * @param context context of the call (user id, center id...)
+	 * @param datasourceObj the datasource object info to get the file content
+	 *
+	 * @return void
+	 */
+	publishEvDocument(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<void>;
 }
 
 /***********************************************************************************
