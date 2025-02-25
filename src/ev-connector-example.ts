@@ -6,6 +6,7 @@ import {
 	EvConnectorObjectMetaData,
 	EvConnectorQuery,
 	EvConnectorServiceInterface,
+	EvFileStatusType,
 	EvMessage
 } from './ev-connector-helper.types';
 
@@ -77,9 +78,9 @@ export default class EvConnectorExample implements EvConnectorServiceInterface {
 	}
 
 	/**
-	 * @See EvConnectorServiceInterface:publishEvDocument
+	 * @See EvConnectorServiceInterface:updateFileLifecycleInPDM
 	 */
-	public async publishEvDocument(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<void> {
+	public async updateFileLifecycleInPDM(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, status: EvFileStatusType): Promise<void> {
 
 	}
 }
