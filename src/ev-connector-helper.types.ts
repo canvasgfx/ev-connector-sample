@@ -95,6 +95,16 @@ export enum EvConnectorObjectType {
 	MULTI_ASSET_3D
 }
 
+/**
+ * Lifecycle state of the evDoc in Envision
+ */
+export enum EvFileStatusType {
+	PUBLISHED = 'published',
+	DRAFT = 'draft',
+	REVIEW = 'review',
+	ARCHIVED = 'archived'
+}
+
 export interface EvConnectorQuery {
 	/**
 	 * filter specific Datasource object ids. Optional
@@ -299,10 +309,11 @@ export interface EvConnectorServiceInterface {
 	 *
 	 * @param context context of the call (user id, center id...)
 	 * @param datasourceObj the datasource object info to get the file content
+	 * @param status the status to which the lifecycle needs to be updated to
 	 *
 	 * @return void
 	 */
-	publishEvDocument(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition): Promise<void>;
+	updateFileLifecycleInPDM(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, status: EvFileStatusType): Promise<void>;
 }
 
 /***********************************************************************************
