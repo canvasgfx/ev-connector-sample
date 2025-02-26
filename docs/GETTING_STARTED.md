@@ -135,6 +135,8 @@ You can also define any additional properties in this JSON object that you might
 
    (viii) **table_additional_columns:** This property is an array of objects, where each object contains id and label properties. Use this property to define additional columns in the table that are not part of your search filters.
 
+   (ix) **manage_life_cycle_states:** This boolean property is set to true if you want the lifecycle state management(Publish/Draft/Review etc.) to be Envision centric.
+
 
 ## Writing a Connector step by step
 
@@ -298,38 +300,42 @@ This command is similar to `save` except that it can perform extra steps on data
 
 `datasourceObj` the datasource object info to get the file content
 
-## Authentication with Datasource
+#### send message function
 
-### Introduction (basic authentication)
-In order for Envision Connector to communicate with datasource system, it needs a mechanism to authenticate to it.
+This command is triggered whenever the user adds a feedback comment to the document.
 
-Some extra parameters can be configured in the user interface, as shown below:
-![](../img/extra_config.png)
+*Function signature*
 
-If there is any need for specific URL, info, or secret, it could be specified here.
+`sendMessage<Payload extends EvMessage = EvMessage>(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, message: Payload): Promise<void>`
 
-Please note that this information is not encrypted, so every Envision Workspace administrator can see the values.
+*Parameters*
 
-Then, in the connector code, you can access such information using `EvConnectorContextDto.connector_config`. (It will contain all the information of this field).
+`context` context of the call (user id, center id...)
 
-### OAuth2 authentication
+`datasourceObj` the datasource object info to get the file content
 
-#### Authorization Code flow
-For a more robust and secure way to authenticate on Datasource side, Envision uses OAuth2 workflow. 
+`message` the content of the message that is added
 
-> In order for this mode to be activated, [the Connector SDK configuration](#connector-configuration) needs to have `grant_type` sets to `authorization_code` and `server_url` sets to the URL of the Identity Provider (where .well-known/openid-configuration is).
 
-Each time an action is initiated by the user that needs the connector SDK, Envision makes sure that a Datasource OAuth2 Access token is available and up to date on client side.
-If not, it automatically starts an OAuth2 authentication workflow, redirecting the user to the Datasource Identity Provider, as shown in the diagram below:
-![](../img/authentication_workflow.png)
+#### update file lifecycle function
 
-**Note:** In the connector configuration, you can set the "is_redirect_uri_configured" property to true if the redirect URI is handled and configured by the authenticator itself.
+This command is triggered only when 'manage_lifecycle_states' property is set to true in the connector config and would make the lifecycle state management Envision centric for a PDM center.
 
-#### Password flow
-This solution is less secure than Authorization Code. However, if Authorization code is not possible, Connector SDK can use a password Oauth2 flow.
-> In order for this mode to be activated, [the Connector SDK configuration](#connector-configuration) needs to have `grant_type` sets to `password` and `server_url` sets to the URL of the Identity Provider (where .well-known/openid-configuration is).
+It will be called when the evdoc is published or when is status is changed to draft, archived or review.
 
-In this mode a popup will show up, asking the user to enter their credentials (username and password). When the form is submitted, it will send the data to the Identity Provider, to get Oauth2 tokens.
+
+*Function signature*
+
+`updateFileLifecycleInPDM(context: EvConnectorContextDto, datasourceObj: EvConnectorObjectDefinition, status: EvFileStatusType): Promise<void>`
+
+*Parameters*
+
+`context` context of the call (user id, center id...)
+
+`datasourceObj` the datasource object info to get the file content
+
+`status` the status to which the lifecycle needs to be updated to
+
 ## Read/write workflows
 
 Connector can support 2 different ways to get/save the data in the datasource. Asynchronous or synchronous workflow.
@@ -398,3 +404,39 @@ This endpoint is used to notify that something happened on datasource side (asyn
 
 This endpoint is used to download an evdoc that is stored in Envision Creator.
 ![](../img/read_content.png)
+
+This endpoint is used to notify Envision that the document is published/released on the datasource side. This endpoint is used when the lifecycle state management is not envision centric(manage_life_cycle_states is set to false in the connector config)
+![](../img/update_lifecycle.png)
+
+## Authentication with Datasource
+
+### Introduction (basic authentication)
+In order for Envision Connector to communicate with datasource system, it needs a mechanism to authenticate to it.
+
+Some extra parameters can be configured in the user interface, as shown below:
+![](../img/extra_config.png)
+
+If there is any need for specific URL, info, or secret, it could be specified here.
+
+Please note that this information is not encrypted, so every Envision Workspace administrator can see the values.
+
+Then, in the connector code, you can access such information using `EvConnectorContextDto.connector_config`. (It will contain all the information of this field).
+
+### OAuth2 authentication
+
+#### Authorization Code flow
+For a more robust and secure way to authenticate on Datasource side, Envision uses OAuth2 workflow. 
+
+> In order for this mode to be activated, [the Connector SDK configuration](#connector-configuration) needs to have `grant_type` sets to `authorization_code` and `server_url` sets to the URL of the Identity Provider (where .well-known/openid-configuration is).
+
+Each time an action is initiated by the user that needs the connector SDK, Envision makes sure that a Datasource OAuth2 Access token is available and up to date on client side.
+If not, it automatically starts an OAuth2 authentication workflow, redirecting the user to the Datasource Identity Provider, as shown in the diagram below:
+![](../img/authentication_workflow.png)
+
+**Note:** In the connector configuration, you can set the "is_redirect_uri_configured" property to true if the redirect URI is handled and configured by the authenticator itself.
+
+#### Password flow
+This solution is less secure than Authorization Code. However, if Authorization code is not possible, Connector SDK can use a password Oauth2 flow.
+> In order for this mode to be activated, [the Connector SDK configuration](#connector-configuration) needs to have `grant_type` sets to `password` and `server_url` sets to the URL of the Identity Provider (where .well-known/openid-configuration is).
+
+In this mode a popup will show up, asking the user to enter their credentials (username and password). When the form is submitted, it will send the data to the Identity Provider, to get Oauth2 tokens.
